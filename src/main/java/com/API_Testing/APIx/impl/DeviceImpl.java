@@ -28,9 +28,9 @@ public class DeviceImpl implements DeviceService {
 
     @Override
     public void create(Device device) {
-        if (deviceRepo.existsByDeviceMAC(device.getDeviceMAC())){
+        /*if (deviceRepo.existsByDeviceMAC(device.getDeviceMAC())){
             throw new IllegalArgumentException("Device already registered..!");
-        }
+        }*/
 
         // Save device to central table
         Device savedDevice = deviceRepo.save(device);
@@ -47,6 +47,7 @@ public class DeviceImpl implements DeviceService {
                         "email VARCHAR(255) NOT NULL UNIQUE, " +
                         "contact_number VARCHAR(255), " +
                         "device_MAC VARCHAR(255), " +
+                        "device_name VARCHAR(255)," +
                         "salary FLOAT, " +
                         "overtime_rate FLOAT, " +
                         "start_date VARCHAR(255), " +

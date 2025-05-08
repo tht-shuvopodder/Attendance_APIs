@@ -15,4 +15,6 @@ public interface EmployeeService {
 
     List<EmployeeDTO> getAllEmployeesByDeviceMAC(String deviceMAC);
 
+    boolean existsByDeviceMACAndEmployeeId(String macAddress, String employeeId);
+
 }

@@ -13,14 +13,14 @@ import java.util.List;
 
 public class EmployeeDTO {
     @NotBlank(message = "MAC address is required and cannot be empty")
-    private String macAddress;  // Mandatory field to target correct table
+    private String deviceMAC;  // Mandatory field to target correct table
+    private String deviceName;
     private String name;
     private String employeeId;
     private String designation;
     private String address;
     private String email;
     private String contactNumber;
-    private String deviceMAC;
     private float salary;
     private float overtimeRate;
     private String startDate;

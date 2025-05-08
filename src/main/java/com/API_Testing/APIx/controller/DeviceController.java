@@ -29,14 +29,14 @@ public class DeviceController {
         try {
             if (deviceService.existsByDeviceMAC(device.getDeviceMAC())) {
                 return ResponseEntity.status(HttpStatus.CONFLICT)
-                        .body("❌ Device with MAC " + device.getDeviceMAC() + " is already registered.");
+                        .body("⛔ Device with MAC " + device.getDeviceMAC() + " is already registered.");
             }
 
             deviceService.create(device);
             return ResponseEntity.ok("✅ New Device added successfully!");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("❌ Failed to register device: " + e.getMessage());
+                    .body("⛔ Failed to register device: " + e.getMessage());
         }
     }
 
@@ -53,7 +53,7 @@ public class DeviceController {
             return ResponseEntity.ok("Device exists. ✅");
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                    String.format("❌ No device found with MAC address [%s]. You may proceed to register it.", deviceMAC)
+                    String.format("⛔ No device found with MAC address [%s]. You may proceed to register it.", deviceMAC)
             );
         }
     }
@@ -75,11 +75,11 @@ public class DeviceController {
             if (rowsAffected > 0) {
                 return ResponseEntity.ok("✅ Device and it's table deleted successfully.");
             } else {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("❌ No such device found.");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("⛔ No such device found.");
             }
 
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("❌ Error deleting device: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("⛔ Error deleting device: " + e.getMessage());
         }
     }
 

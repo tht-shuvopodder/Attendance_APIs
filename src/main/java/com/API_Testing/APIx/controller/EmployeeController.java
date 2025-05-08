@@ -2,6 +2,7 @@ package com.API_Testing.APIx.controller;
 
 
 import com.API_Testing.APIx.model.request.EmployeeDTO;
+import com.API_Testing.APIx.service.DeviceService;
 import com.API_Testing.APIx.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,27 +17,38 @@ import java.util.Map;
 public class EmployeeController {
 
     @Autowired
+    DeviceService deviceService;
+
+    @Autowired
     EmployeeService employeeService;
 
     @PostMapping("/add")
     public ResponseEntity<String> addEmployeeToDevice(@RequestBody EmployeeDTO employee) {
         try {
-            if (employee.getMacAddress() == null || employee.getMacAddress().isBlank()) {
+            if (employee.getDeviceMAC() == null || employee.getDeviceMAC().isBlank()) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("❌ MAC address is mandatory to add employee data.");
+                        .body("⛔ MAC address is mandatory to add employee data.");
             }
 
-            if (!employee.getMacAddress().equals(employee.getDeviceMAC())) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("❌ macAddress and deviceMAC must be the same.");
+
+            if (!deviceService.existsByDeviceMAC(employee.getDeviceMAC())) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("⛔ Device with MAC [" + (employee.getDeviceMAC()) + "] does not exist. Please register the device first.");
             }
+
+
+            if (employeeService.existsByDeviceMACAndEmployeeId(employee.getDeviceMAC(), employee.getEmployeeId())) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("❌ Employee with ID [" + (employee.getEmployeeId()) + "] already exists under device [" + (employee.getDeviceMAC()) + "].");
+            }
+
 
             employeeService.addEmployeeToDevice(employee);
-            return ResponseEntity.ok("✅ Employee added successfully under device MAC [" + employee.getMacAddress() + "].");
+            return ResponseEntity.ok("✅ Employee added successfully under device MAC [" + employee.getDeviceMAC() + "].");
 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                    "❌ Failed to add employee: " + e.getMessage()
+                    "⛔ Failed to add employee: " + e.getMessage()
             );
         }
     }
@@ -52,7 +64,7 @@ public class EmployeeController {
             return ResponseEntity.ok("✅ Employee updated successfully.");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("❌ Update failed: " + e.getMessage());
+                    .body("⛔ Update failed: " + e.getMessage());
         }
     }
 
@@ -65,7 +77,7 @@ public class EmployeeController {
             return ResponseEntity.ok("✅ Employee deleted successfully.");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("❌ Deletion failed: " + e.getMessage());
+                    .body("⛔ Deletion failed: " + e.getMessage());
         }
     }
 
@@ -76,18 +88,18 @@ public class EmployeeController {
 
             if (employees == null || employees.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("❌ No employees found for device MAC: " + deviceMAC);
+                        .body("⛔ No employees found for device MAC: " + deviceMAC);
             }
 
             return ResponseEntity.ok(employees);
 
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("❌ Invalid device MAC address: " + e.getMessage());
+                    .body("⛔ Invalid device MAC address: " + e.getMessage());
 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("❌ Server error while retrieving employees: " + e.getMessage());
+                    .body("⛔ Server error while retrieving employees: " + e.getMessage());
         }
     }
 

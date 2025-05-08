@@ -1,6 +1,7 @@
 package com.API_Testing.APIx.service;
 
 import com.API_Testing.APIx.model.Device;
+import jakarta.validation.constraints.NotBlank;
 
 import java.util.List;
 

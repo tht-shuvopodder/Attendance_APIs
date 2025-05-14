@@ -14,4 +14,8 @@ public interface DeviceService {
 
     boolean existsByDeviceMAC(String macAddress);
 
+    int deleteDevice(String macAddress, String tableName);
+
+    String formatMacToTableName(String mac);
+
 }

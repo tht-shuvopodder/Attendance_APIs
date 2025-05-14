@@ -13,4 +13,8 @@ public interface PhoneLogService {
 
     PhoneLogDTO mapToDTO (PhoneLog log);
 
+    String updateValid(String email, boolean value);
+
+    void deletePhoneLog(String deviceMAC, String empId);
+
 }

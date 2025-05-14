@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 
-
 @Service
 public class DeviceImpl implements DeviceService {
 
@@ -28,11 +27,7 @@ public class DeviceImpl implements DeviceService {
 
     @Override
     public void create(Device device) {
-        /*if (deviceRepo.existsByDeviceMAC(device.getDeviceMAC())){
-            throw new IllegalArgumentException("Device already registered..!");
-        }*/
 
-        // Save device to central table
         Device savedDevice = deviceRepo.save(device);
 
         String tableName = formatMacToTableName(device.getDeviceMAC());
@@ -65,6 +60,7 @@ public class DeviceImpl implements DeviceService {
 
     }
 
+    @Override
     public String formatMacToTableName(String deviceMAC) {
         return "device_" + deviceMAC.replace(":", "_").replace("-", "_");
     }
@@ -79,6 +75,12 @@ public class DeviceImpl implements DeviceService {
     @Override
     public boolean  existsByDeviceMAC(String deviceMAC){
         return deviceRepo.existsByDeviceMAC(deviceMAC);
+    }
+
+    @Override
+    public int deleteDevice(String macAddress, String tableName) {
+        jdbcTemplate.execute("DROP TABLE IF EXISTS " + tableName);
+        return jdbcTemplate.update("DELETE FROM device_info WHERE mac_address = ?", macAddress);
     }
 
 

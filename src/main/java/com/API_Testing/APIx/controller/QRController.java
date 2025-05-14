@@ -52,13 +52,13 @@ public class QRController {
 
         if (count == null || count == 0) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Employee not found for this device ⛔");
+                    .body("⚠️ Employee not found for this device..!");
         }
 
         // ✅ Step 2: Check if the employee already used a QR for this device
         if (qrlogService.existsByMacAndEmployeeEmailAndUsedIsTrue(deviceMAC, email)) {
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE)
-                    .body("Access already verified. QR generation denied ⛔");
+                    .body("Access already verified. QR generation denied ⚠️");
         }
 
         // ✅ Step 3: Generate UUID and QR
@@ -121,7 +121,7 @@ public class QRController {
             return ResponseEntity.ok("QR code verified successfully ✅");
 
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body("Malformed UUID ⛔");
+            return ResponseEntity.badRequest().body("Malformed UUID ⚠️");
         }
     }
 

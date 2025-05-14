@@ -11,4 +11,5 @@ public interface PhoneLogRepo extends JpaRepository<PhoneLog, String> {
 
     Optional<PhoneLog> findByEmail(String email);
     Optional<PhoneLog> findByEmpId(String empId);
+
 }

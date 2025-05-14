@@ -11,7 +11,7 @@ public interface EmployeeService {
 
     void partialUpdateEmployee(String macAddress, String employeeId, Map<String, Object> updates);
 
-    void deleteEmployee(String macAddress, String employeeId);
+    String deleteEmployee(String macAddress, String employeeId);
 
     List<EmployeeDTO> getAllEmployeesByDeviceMAC(String deviceMAC);
 

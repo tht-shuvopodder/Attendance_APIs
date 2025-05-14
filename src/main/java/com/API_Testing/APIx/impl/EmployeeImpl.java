@@ -5,7 +5,7 @@ import com.API_Testing.APIx.model.request.EmployeeDTO;
 import com.API_Testing.APIx.service.EmployeeService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -16,70 +16,58 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class EmployeeImpl implements EmployeeService{
+@RequiredArgsConstructor
+public class EmployeeImpl implements EmployeeService {
 
-    @Autowired
-    ObjectMapper objectMapper;
+    private final JdbcTemplate jdbcTemplate;
+    private final ObjectMapper objectMapper;
 
-    @Autowired
-    JdbcTemplate jdbcTemplate;
+    private static final Map<String, String> FIELD_TO_COLUMN = Map.ofEntries(
+            Map.entry("name", "name"),
+            Map.entry("designation", "designation"),
+            Map.entry("address", "address"),
+            Map.entry("email", "email"),
+            Map.entry("contactNumber", "contact_number"),
+            Map.entry("salary", "salary"),
+            Map.entry("overtimeRate", "overtime_rate"),
+            Map.entry("startDate", "start_date"),
+            Map.entry("startTime", "start_time"),
+            Map.entry("imageFile", "image_file"),
+            Map.entry("employeeType", "employee_type"),
+            Map.entry("allowedAttendanceModes", "allowed_attendance_modes"),
+            Map.entry("allowedAttendanceActions", "allowed_attendance_actions"),
+            Map.entry("visibleDataTypes", "visible_data_types"),
+            Map.entry("addedBy", "added_by"),
+            Map.entry("embedding", "embedding"),
+            Map.entry("employeeId", "employee_id"),
+            Map.entry("macAddress", "device_mac"),
+            Map.entry("deviceName", "device_name")
+    );
+
+    private String formatMacToTableName(String macAddress) {
+        return "device_" + macAddress.replace(":", "_").replace("-", "_");
+    }
 
     @Override
     public void addEmployeeToDevice(EmployeeDTO employee) {
-        String tableName = formatMacToTableName(employee.getDeviceMAC());
-
         if (employee.getDeviceMAC() == null || employee.getDeviceMAC().isBlank()) {
             throw new IllegalArgumentException("MAC address is mandatory to add employee data.");
         }
+        String tableName = formatMacToTableName(employee.getDeviceMAC());
+        String embeddingJson = serializeEmbedding(employee.getEmbedding());
 
-        // ✅ Convert List<Double> embedding to JSON string
-        String embeddingJson;
-        try {
-            embeddingJson = objectMapper.writeValueAsString(employee.getEmbedding());
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to convert embedding to JSON", e);
-        }
+        String sql = String.format("INSERT INTO %s (name, employee_id, designation, address, email, contact_number, " +
+                "device_MAC, device_name, salary, overtime_rate, start_date, start_time, image_file, employee_type, " +
+                "allowed_attendance_modes, allowed_attendance_actions, visible_data_types, added_by, embedding) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", tableName);
 
-        try {
-            String jsonEmbedding = objectMapper.writeValueAsString(employee.getEmbedding());
-            String insertSQL = String.format(
-                    "INSERT INTO %s (name, employee_id, designation, address, email, contact_number, device_MAC, device_name, salary, " +
-                            "overtime_rate, start_date, start_time, image_file, employee_type, allowed_attendance_modes, " +
-                            "allowed_attendance_actions, visible_data_types, added_by, embedding) " +
-                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                    tableName
-            );
-
-            jdbcTemplate.update(insertSQL,
-                    employee.getName(),
-                    employee.getEmployeeId(),
-                    employee.getDesignation(),
-                    employee.getAddress(),
-                    employee.getEmail(),
-                    employee.getContactNumber(),
-                    employee.getDeviceMAC(),
-                    employee.getDeviceName(),
-                    employee.getSalary(),
-                    employee.getOvertimeRate(),
-                    employee.getStartDate(),
-                    employee.getStartTime(),
-                    employee.getImageFile(),
-                    employee.getEmployeeType(),
-                    employee.getAllowedAttendanceModes(),
-                    employee.getAllowedAttendanceActions(),
-                    employee.getVisibleDataTypes(),
-                    employee.getAddedBy(),
-                    embeddingJson
-            );
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Failed to serialize embedding list to JSON", e);
-        }
+        jdbcTemplate.update(sql,
+                employee.getName(), employee.getEmployeeId(), employee.getDesignation(), employee.getAddress(),
+                employee.getEmail(), employee.getContactNumber(), employee.getDeviceMAC(), employee.getDeviceName(),
+                employee.getSalary(), employee.getOvertimeRate(), employee.getStartDate(), employee.getStartTime(),
+                employee.getImageFile(), employee.getEmployeeType(), employee.getAllowedAttendanceModes(),
+                employee.getAllowedAttendanceActions(), employee.getVisibleDataTypes(), employee.getAddedBy(), embeddingJson);
     }
-
-    public String formatMacToTableName(String deviceMAC) {
-        return "device_" + deviceMAC.replace(":", "_").replace("-", "_");
-    }
-
 
     @Override
     public void partialUpdateEmployee(String macAddress, String employeeId, Map<String, Object> updates) {
@@ -87,82 +75,57 @@ public class EmployeeImpl implements EmployeeService{
         StringBuilder sql = new StringBuilder("UPDATE " + tableName + " SET ");
         List<Object> params = new ArrayList<>();
 
-        Map<String, String> fieldToColumn = Map.ofEntries(
-                Map.entry("name", "name"),
-                Map.entry("designation", "designation"),
-                Map.entry("address", "address"),
-                Map.entry("email", "email"),
-                Map.entry("contactNumber", "contact_number"),
-                Map.entry("salary", "salary"),
-                Map.entry("overtimeRate", "overtime_rate"),
-                Map.entry("startDate", "start_date"),
-                Map.entry("startTime", "start_time"),
-                Map.entry("imageFile", "image_file"),
-                Map.entry("employeeType", "employee_type"),
-                Map.entry("allowedAttendanceModes", "allowed_attendance_modes"),
-                Map.entry("allowedAttendanceActions", "allowed_attendance_actions"),
-                Map.entry("visibleDataTypes", "visible_data_types"),
-                Map.entry("addedBy", "added_by"),
-                Map.entry("embedding", "embedding"),
-                Map.entry("employeeId", "employee_id"),
-                Map.entry("macAddress", "device_mac"),
-                Map.entry("deviceName", "device_name")
-        );
-
         for (Map.Entry<String, Object> entry : updates.entrySet()) {
-            String field = entry.getKey();
-            Object value = entry.getValue();
-
-            String column = fieldToColumn.get(field);
-            if (column == null || value == null) continue; // Skip unknown or null
+            String column = FIELD_TO_COLUMN.get(entry.getKey());
+            if (column == null || entry.getValue() == null) continue;
 
             sql.append(column).append(" = ?, ");
-
-            if ("embedding".equals(field)) {
-                try {
-                    String jsonEmbedding = objectMapper.writeValueAsString(value);
-                    params.add(jsonEmbedding);
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException("Failed to serialize embedding list to JSON", e);
-                }
+            if ("embedding".equals(entry.getKey())) {
+                params.add(serializeEmbedding(entry.getValue()));
             } else {
-                params.add(value);
+                params.add(entry.getValue());
             }
         }
 
-        if (params.isEmpty()) {
-            throw new RuntimeException("No valid fields to update.");
-        }
+        if (params.isEmpty()) throw new RuntimeException("No valid fields to update.");
 
-        sql.setLength(sql.length() - 2); // remove last comma
+        sql.setLength(sql.length() - 2);
         sql.append(" WHERE employee_id = ?");
         params.add(employeeId);
 
-        int rows = jdbcTemplate.update(sql.toString(), params.toArray());
-        if (rows == 0) {
+        if (jdbcTemplate.update(sql.toString(), params.toArray()) == 0) {
             throw new RuntimeException("Employee not found or update failed.");
         }
     }
 
-
-
     @Override
-    public void deleteEmployee(String macAddress, String employeeId) {
+    public String deleteEmployee(String macAddress, String employeeId) {
         String tableName = formatMacToTableName(macAddress);
-        String sql = "DELETE FROM " + tableName + " WHERE employee_id = ?";
-        int rows = jdbcTemplate.update(sql, employeeId);
+        int rows = jdbcTemplate.update("DELETE FROM " + tableName + " WHERE employee_id = ?", employeeId);
+
+        StringBuilder result = new StringBuilder();
+
         if (rows == 0) {
-            throw new RuntimeException("Employee not found or already deleted.");
+            result.append("Employee not found..!");
+        } else {
+            result.append("✅ Employee deleted successfully ");
         }
+        int logRows = jdbcTemplate.update("DELETE FROM phone_log WHERE emp_id = ?", employeeId);
+
+
+        if (logRows == 0) {
+            result.append("⚠️ but Phone Log not found for deletion.");
+        } else {
+            result.append("with the Phone Log.");
+        }
+
+        return result.toString();
     }
 
     @Override
     public List<EmployeeDTO> getAllEmployeesByDeviceMAC(String deviceMAC) {
         String tableName = formatMacToTableName(deviceMAC);
-
-        String sql = String.format("SELECT * FROM %s", tableName);
-
-        return jdbcTemplate.query(sql, (rs, rowNum) -> {
+        return jdbcTemplate.query("SELECT * FROM " + tableName, (rs, rowNum) -> {
             EmployeeDTO dto = new EmployeeDTO();
             dto.setDeviceMAC(rs.getString("device_MAC"));
             dto.setDeviceName(rs.getString("device_name"));
@@ -183,13 +146,10 @@ public class EmployeeImpl implements EmployeeService{
             dto.setVisibleDataTypes(rs.getString("visible_data_types"));
             dto.setAddedBy(rs.getString("added_by"));
 
-            // Handle embedding JSON string
             try {
-                String embeddingJson = rs.getString("embedding");
-                List<Double> embeddingList = objectMapper.readValue(embeddingJson, new TypeReference<List<Double>>() {});
-                dto.setEmbedding(embeddingList);
+                dto.setEmbedding(objectMapper.readValue(rs.getString("embedding"), new TypeReference<>() {}));
             } catch (Exception e) {
-                dto.setEmbedding(Collections.emptyList()); // Or log error
+                dto.setEmbedding(Collections.emptyList());
             }
 
             return dto;
@@ -199,10 +159,16 @@ public class EmployeeImpl implements EmployeeService{
     @Override
     public boolean existsByDeviceMACAndEmployeeId(String macAddress, String employeeId) {
         String tableName = formatMacToTableName(macAddress);
-        String sql = "SELECT COUNT(*) FROM " + tableName + " WHERE employee_id = ?";
-        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, employeeId);
+        Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + tableName + " WHERE employee_id = ?",
+                Integer.class, employeeId);
         return count != null && count > 0;
     }
 
-
+    private String serializeEmbedding(Object embedding) {
+        try {
+            return objectMapper.writeValueAsString(embedding);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to serialize embedding", e);
+        }
+    }
 }

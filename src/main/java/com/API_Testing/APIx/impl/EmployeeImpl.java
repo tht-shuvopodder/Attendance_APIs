@@ -3,11 +3,13 @@ package com.API_Testing.APIx.impl;
 
 import com.API_Testing.APIx.model.request.EmployeeDTO;
 import com.API_Testing.APIx.service.EmployeeService;
+import com.API_Testing.APIx.websocket.Notification;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -23,6 +25,12 @@ public class EmployeeImpl implements EmployeeService{
 
     @Autowired
     JdbcTemplate jdbcTemplate;
+
+    private final SimpMessagingTemplate simpMessagingTemplate;
+
+    public EmployeeImpl(SimpMessagingTemplate simpMessagingTemplate) {
+        this.simpMessagingTemplate = simpMessagingTemplate;
+    }
 
     @Override
     public void addEmployeeToDevice(EmployeeDTO employee) {
@@ -79,7 +87,6 @@ public class EmployeeImpl implements EmployeeService{
     public String formatMacToTableName(String deviceMAC) {
         return "device_" + deviceMAC.replace(":", "_").replace("-", "_");
     }
-
 
     @Override
     public void partialUpdateEmployee(String macAddress, String employeeId, Map<String, Object> updates) {
@@ -144,8 +151,6 @@ public class EmployeeImpl implements EmployeeService{
         }
     }
 
-
-
     @Override
     public void deleteEmployee(String macAddress, String employeeId) {
         String tableName = formatMacToTableName(macAddress);
@@ -154,6 +159,12 @@ public class EmployeeImpl implements EmployeeService{
         if (rows == 0) {
             throw new RuntimeException("Employee not found or already deleted.");
         }
+
+        Notification notification = new Notification();
+        notification.setContent("Employee " + employeeId + " deleted.");
+        notification.setType("SYSTEM");
+        simpMessagingTemplate.convertAndSend("/topic/notifications/"+employeeId, notification);
+
     }
 
     @Override

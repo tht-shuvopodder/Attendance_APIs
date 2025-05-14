@@ -22,7 +22,6 @@ public class Device {
     @Column(name = "ID")
     private Integer id;
 
-
     @Column(name = "Device_Name")
     private String name;
 

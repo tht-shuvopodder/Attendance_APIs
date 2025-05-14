@@ -9,7 +9,6 @@ import lombok.Setter;
 @Setter
 
 public class QRRequestDTO {
-
     private String deviceMAC;
     private String employeeEmail;
     private String employeeId;

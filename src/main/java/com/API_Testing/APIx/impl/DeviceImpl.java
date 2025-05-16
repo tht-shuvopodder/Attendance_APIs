@@ -82,6 +82,4 @@ public class DeviceImpl implements DeviceService {
         jdbcTemplate.execute("DROP TABLE IF EXISTS " + tableName);
         return jdbcTemplate.update("DELETE FROM device_info WHERE mac_address = ?", macAddress);
     }
-
-
 }

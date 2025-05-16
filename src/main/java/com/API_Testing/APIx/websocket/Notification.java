@@ -1,5 +1,6 @@
 package com.API_Testing.APIx.websocket;
 
+import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -10,6 +11,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
+@Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,6 +23,7 @@ public class Notification {
     private String content;
     private boolean read=false;
     private String receiver;
+    private String mac;
     private String type;
     @CreationTimestamp
     private LocalDateTime date;

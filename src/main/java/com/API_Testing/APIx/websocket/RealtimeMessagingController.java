@@ -1,5 +1,6 @@
 package com.API_Testing.APIx.websocket;
 
+import com.API_Testing.APIx.repository.NotificationRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -15,9 +16,11 @@ public class RealtimeMessagingController {
     private static final Logger logger = LoggerFactory.getLogger(RealtimeMessagingController.class);
 
     private final SimpMessagingTemplate simpMessagingTemplate;
+    private final NotificationRepository notificationRepository;
 
-    public RealtimeMessagingController(SimpMessagingTemplate simpMessagingTemplate) {
+    public RealtimeMessagingController(SimpMessagingTemplate simpMessagingTemplate, NotificationRepository notificationRepository) {
         this.simpMessagingTemplate = simpMessagingTemplate;
+        this.notificationRepository = notificationRepository;
     }
 
     @MessageMapping("/messages")
@@ -28,6 +31,20 @@ public class RealtimeMessagingController {
 
         simpMessagingTemplate.convertAndSend("/topic/chat", message);
         return ResponseEntity.ok(message);
+    }
+
+    @MessageMapping("/notification-seen")
+    public void seenNotification(@Payload Notification notification){
+        logger.info("Notification seen received: " + notification);
+        notificationRepository.delete(notification);
+    }
+
+    @MessageMapping("/connect")
+    public void connectUser(String mac, String emplyeeId){
+        logger.info("Connecting user: " + mac);
+
+        // search in db and resend to user
+
     }
 
     @MessageMapping("/notifications-send")

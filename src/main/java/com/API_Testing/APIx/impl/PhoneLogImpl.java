@@ -61,6 +61,8 @@ public class PhoneLogImpl implements PhoneLogService {
         notification.setType("SYSTEM");
         System.out.println("/topic/notifications/"+phoneLog.getDeviceMAC()+"/"+phoneLog.getEmpId());
         //simpMessagingTemplate.convertAndSend("/topic/notifications/"+macAddress+"/"+employeeId, notification);
+
+        notification.setMac(phoneLog.getDeviceMAC());
         notificationServiceController.sendMessage("/topic/notifications/"+phoneLog.getDeviceMAC()+"/"+phoneLog.getEmpId(), notification);
         return saved;
     }

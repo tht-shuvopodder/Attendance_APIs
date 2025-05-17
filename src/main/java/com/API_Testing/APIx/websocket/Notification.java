@@ -19,9 +19,9 @@ public class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String title = "Notification";
+    private String title;
     private String content;
-    private boolean read=false;
+    private boolean is_read;
     private String receiver;
     private String mac;
     private String type;

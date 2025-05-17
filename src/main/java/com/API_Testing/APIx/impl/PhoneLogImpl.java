@@ -55,7 +55,7 @@ public class PhoneLogImpl implements PhoneLogService {
 
         Notification notification = new Notification();
         notification.setTitle("Welcome ");
-        notification.setRead(false);
+        notification.set_read(false);
         notification.setContent("Welcome message");
         notification.setReceiver(phoneLog.getEmpId());
         notification.setType("SYSTEM");

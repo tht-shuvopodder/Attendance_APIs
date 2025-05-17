@@ -42,7 +42,7 @@ public class RealtimeMessagingController {
     }
 
     @MessageMapping("/connect")
-    public void connectUser(String mac, String emplyeeId){
+    public void connectUser(@Payload String mac, @Payload String emplyeeId){
         logger.info("Connecting user: " + mac);
 
         // search in db and resend to user

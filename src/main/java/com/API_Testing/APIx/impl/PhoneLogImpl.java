@@ -4,6 +4,8 @@ import com.API_Testing.APIx.model.PhoneLog;
 import com.API_Testing.APIx.model.request.PhoneLogDTO;
 import com.API_Testing.APIx.repository.PhoneLogRepo;
 import com.API_Testing.APIx.service.PhoneLogService;
+import com.API_Testing.APIx.websocket.Notification;
+import com.API_Testing.APIx.websocket.NotificationServiceController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,12 @@ public class PhoneLogImpl implements PhoneLogService {
 
     @Autowired
     JdbcTemplate jdbcTemplate;
+
+    private final NotificationServiceController notificationServiceController;
+
+    public PhoneLogImpl(NotificationServiceController notificationServiceController) {
+        this.notificationServiceController = notificationServiceController;
+    }
 
     @Override
     public PhoneLog save(PhoneLog phoneLog){
@@ -42,7 +50,21 @@ public class PhoneLogImpl implements PhoneLogService {
         log.setEmail(phoneLog.getEmail());
         log.setDeviceMAC(phoneLog.getDeviceMAC());
         log.setValid(true);
-        return phoneLogRepo.save(log);
+        PhoneLog saved = phoneLogRepo.save(log);
+
+
+        Notification notification = new Notification();
+        notification.setTitle("Welcome ");
+        notification.setSeen(false);
+        notification.setContent("Welcome message");
+        notification.setReceiver(phoneLog.getEmpId());
+        notification.setType("SYSTEM");
+        System.out.println("/topic/notifications/"+phoneLog.getDeviceMAC()+"/"+phoneLog.getEmpId());
+        //simpMessagingTemplate.convertAndSend("/topic/notifications/"+macAddress+"/"+employeeId, notification);
+
+        notification.setMac(phoneLog.getDeviceMAC());
+        notificationServiceController.sendMessage("/topic/notifications/"+phoneLog.getDeviceMAC()+"/"+phoneLog.getEmpId(), notification);
+        return saved;
     }
 
     public String formatMacToTableName(String deviceMAC) {

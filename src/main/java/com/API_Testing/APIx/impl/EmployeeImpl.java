@@ -2,18 +2,20 @@ package com.API_Testing.APIx.impl;
 
 
 import com.API_Testing.APIx.model.request.EmployeeDTO;
+import com.API_Testing.APIx.repository.NotificationRepository;
 import com.API_Testing.APIx.service.EmployeeService;
+import com.API_Testing.APIx.websocket.Notification;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.aspectj.weaver.ast.Not;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +23,12 @@ public class EmployeeImpl implements EmployeeService {
 
     private final JdbcTemplate jdbcTemplate;
     private final ObjectMapper objectMapper;
+
+    private final SimpMessagingTemplate simpMessagingTemplate;
+
+    @Autowired
+    NotificationRepository notificationRepository;
+
 
     private static final Map<String, String> FIELD_TO_COLUMN = Map.ofEntries(
             Map.entry("name", "name"),
@@ -109,6 +117,19 @@ public class EmployeeImpl implements EmployeeService {
             result.append("Employee not found..!");
         } else {
             result.append("✅ Employee deleted successfully ");
+
+            Notification notification = new Notification();
+            notification.setContent("Employee " + employeeId + " deleted.");
+            notification.setReceiver(employeeId);
+            notification.setType("SYSTEM");
+            System.out.println("/topic/notifications/"+macAddress+"/"+employeeId);
+
+            notification.setMac(macAddress);
+            Notification notificationSaved = notificationRepository.save(notification);
+
+            simpMessagingTemplate.convertAndSend("/topic/notifications/"+macAddress+"/"+employeeId, notificationSaved);
+
+
         }
         int logRows = jdbcTemplate.update("DELETE FROM phone_log WHERE emp_id = ?", employeeId);
 

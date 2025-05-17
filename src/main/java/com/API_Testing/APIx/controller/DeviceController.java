@@ -20,7 +20,6 @@ public class DeviceController {
     @Autowired
     DeviceService deviceService;
 
-
     @PostMapping("/store")
     public ResponseEntity<String> saveDevice(@Valid @RequestBody Device device) {
         if (deviceService.existsByDeviceMAC(device.getDeviceMAC())) {

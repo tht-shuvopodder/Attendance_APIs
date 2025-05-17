@@ -10,5 +10,5 @@ public interface AttendanceLogService {
     String punchAttendance(AttendanceLogDTO dto);
     List<AttendanceLogDTO> getByDate(LocalDate date);
     AttendanceLogDTO getByEmpAndDate(String empId, LocalDate date);
-
+    List<AttendanceLogDTO> getAllByDeviceMacAndEmpId(String deviceMAC, String empId);
 }

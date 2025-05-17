@@ -11,6 +11,7 @@ public interface AttendanceLogRepo extends JpaRepository<AttendanceLog, String> 
 
     List<AttendanceLog> findAllByDate(LocalDate date);
     Optional<AttendanceLog> findByEmpIdAndDate(String empId, LocalDate date);
+    List<AttendanceLog> findByEmpIdAndMacID(String empId, String macID);
 
 
 }

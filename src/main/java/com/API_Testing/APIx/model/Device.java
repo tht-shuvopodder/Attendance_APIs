@@ -3,15 +3,20 @@ package com.API_Testing.APIx.model;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
+import javax.naming.Name;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Data
 @Getter
 @Setter
+@NoArgsConstructor
 @Table(name = "device_info")
 
 
@@ -24,7 +29,7 @@ public class Device {
 
 
     @Column(name = "Device_Name")
-    private String name;
+    private String deviceName;
 
     @Column(name = "MAC_Address",unique = true)
     private String deviceMAC;
@@ -35,4 +40,10 @@ public class Device {
     @CreationTimestamp
     @Column(name = "Created_At",nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @Column(name = "Active")
+    private boolean active;
+
+
+
 }

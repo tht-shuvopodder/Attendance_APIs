@@ -1,6 +1,7 @@
 package com.API_Testing.APIx.impl;
 
 import com.API_Testing.APIx.model.Device;
+import com.API_Testing.APIx.model.request.DeviceDTO;
 import com.API_Testing.APIx.repository.DeviceRepo;
 import com.API_Testing.APIx.service.DeviceService;
 import jakarta.persistence.EntityManager;
@@ -9,7 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
+
 
 
 @Service
@@ -27,8 +30,6 @@ public class DeviceImpl implements DeviceService {
 
     @Override
     public void create(Device device) {
-
-        Device savedDevice = deviceRepo.save(device);
 
         String tableName = formatMacToTableName(device.getDeviceMAC());
 
@@ -58,12 +59,25 @@ public class DeviceImpl implements DeviceService {
 
         jdbcTemplate.execute(createTableSQL);
 
+        device.setActive(true);
+        deviceRepo.save(device);
     }
 
     @Override
     public String formatMacToTableName(String deviceMAC) {
         return "device_" + deviceMAC.replace(":", "_").replace("-", "_");
     }
+
+    public Device mapToDevice(DeviceDTO dto) {
+        Device device = new Device();
+        device.setDeviceName(dto.getDeviceName());
+        device.setDeviceMAC(dto.getDeviceMAC());
+        device.setDeviceDescription(dto.getDeviceDescription());
+        device.setActive(dto.isActive());
+        device.setCreatedAt(LocalDateTime.now());
+        return device;
+    }
+
 
 
     @Override

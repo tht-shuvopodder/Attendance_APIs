@@ -41,5 +41,15 @@ public class AttendanceLogController {
         return ResponseEntity.ok(dto);
     }
 
+    @GetMapping("/attendance-by-device")
+    public ResponseEntity<List<AttendanceLogDTO>> getAllAttendanceByEmpAndDevice(
+            @RequestParam String deviceMAC,
+            @RequestParam String empId) {
+
+        List<AttendanceLogDTO> logs = attendanceLogService.getAllByDeviceMacAndEmpId(deviceMAC, empId);
+        return ResponseEntity.ok(logs);
+    }
+
+
 
 }

@@ -2,6 +2,7 @@ package com.API_Testing.APIx.controller;
 
 
 import com.API_Testing.APIx.model.Device;
+import com.API_Testing.APIx.model.request.DeviceDTO;
 import com.API_Testing.APIx.service.DeviceService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,13 +22,17 @@ public class DeviceController {
     DeviceService deviceService;
 
     @PostMapping("/store")
-    public ResponseEntity<String> saveDevice(@Valid @RequestBody Device device) {
-        if (deviceService.existsByDeviceMAC(device.getDeviceMAC())) {
-            throw new IllegalArgumentException("Device with MAC " + device.getDeviceMAC() + " is already registered.");
+    public ResponseEntity<String> saveDevice(@Valid @RequestBody DeviceDTO dto) {
+        if (deviceService.existsByDeviceMAC(dto.getDeviceMAC())) {
+            throw new IllegalArgumentException("Device with MAC " + dto.getDeviceMAC() + " is already registered.");
         }
+        // Map DTO → Entity
+        Device device = deviceService.mapToDevice(dto);
 
+        // Create dynamic employee table
         deviceService.create(device);
-        return ResponseEntity.ok("✅ New Device added successfully!");
+
+        return ResponseEntity.ok("✅ New Device added successfully.");
     }
 
     @GetMapping("/all")
@@ -53,10 +58,11 @@ public class DeviceController {
         int rowsAffected = deviceService.deleteDevice(macAddress, tableName);
 
         if (rowsAffected > 0) {
-            return ResponseEntity.ok("✅ Device and its table deleted successfully.");
+            return ResponseEntity.ok("✅ Device and it's table deleted successfully.");
         } else {
             throw new NoSuchElementException("No such device found..!");
         }
     }
+
 
 }

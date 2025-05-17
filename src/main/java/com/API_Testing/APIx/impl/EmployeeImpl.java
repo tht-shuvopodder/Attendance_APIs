@@ -9,6 +9,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.aspectj.weaver.ast.Not;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -122,10 +123,13 @@ public class EmployeeImpl implements EmployeeService {
             notification.setReceiver(employeeId);
             notification.setType("SYSTEM");
             System.out.println("/topic/notifications/"+macAddress+"/"+employeeId);
-            simpMessagingTemplate.convertAndSend("/topic/notifications/"+macAddress+"/"+employeeId, notification);
 
             notification.setMac(macAddress);
-            notificationRepository.save(notification);
+            Notification notificationSaved = notificationRepository.save(notification);
+
+            simpMessagingTemplate.convertAndSend("/topic/notifications/"+macAddress+"/"+employeeId, notificationSaved);
+
+
         }
         int logRows = jdbcTemplate.update("DELETE FROM phone_log WHERE emp_id = ?", employeeId);
 

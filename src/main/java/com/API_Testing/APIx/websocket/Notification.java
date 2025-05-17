@@ -21,10 +21,10 @@ public class Notification {
     private Long id;
     private String title;
     private String content;
-    private boolean is_read;
+    private boolean seen;
     private String receiver;
     private String mac;
     private String type;
     @CreationTimestamp
-    private LocalDateTime date;
+    private String date;
 }

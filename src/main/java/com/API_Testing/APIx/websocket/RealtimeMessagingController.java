@@ -11,6 +11,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 import java.util.List;
+import java.util.Map;
 
 @Controller
 public class RealtimeMessagingController {
@@ -42,13 +43,18 @@ public class RealtimeMessagingController {
     }
 
     @MessageMapping("/connect")
-    public void connectUser(@Payload String mac, @Payload String emplyeeId){
+    public void connectUser(@Payload Map<String, String> payload){
+        String mac = payload.get("mac");
+        String employeeId = payload.get("employeeId");
+
         logger.info("Connecting user: " + mac);
 
         // search in db and resend to user
-        List<Notification> notificationList = notificationRepository.findAllByMacAndReceiver(mac, emplyeeId);
+        List<Notification> notificationList = notificationRepository.findAllByMacAndReceiver(mac, employeeId);
+        System.out.println("Notification Count: " + notificationList.size());
         for (Notification notification : notificationList) {
-            simpMessagingTemplate.convertAndSend("/topic/notifications/"+mac+"/"+emplyeeId, notification);
+            //logger.info("Notification sending: " + notification);
+            simpMessagingTemplate.convertAndSend("/topic/notifications/"+mac+"/"+employeeId, notification);
         }
     }
 

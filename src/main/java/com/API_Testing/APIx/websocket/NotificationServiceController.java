@@ -25,7 +25,8 @@ public class NotificationServiceController {
 
     public void sendMessage(String destination, Object message) {
         logger.info("Sending Message to {} : {}", destination, message);
-        simpMessagingTemplate.convertAndSend(destination, message);
-        notificationRepository.save((Notification) message);
+
+        Notification notification = notificationRepository.save((Notification) message);
+        simpMessagingTemplate.convertAndSend(destination, notification);
     }
 }

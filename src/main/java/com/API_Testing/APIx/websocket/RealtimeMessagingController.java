@@ -10,6 +10,8 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
+import java.util.List;
+
 @Controller
 public class RealtimeMessagingController {
 
@@ -44,7 +46,10 @@ public class RealtimeMessagingController {
         logger.info("Connecting user: " + mac);
 
         // search in db and resend to user
-
+        List<Notification> notificationList = notificationRepository.findAllByMacAndReceiver(mac, emplyeeId);
+        for (Notification notification : notificationList) {
+            simpMessagingTemplate.convertAndSend("/topic/notifications/"+mac+"/"+emplyeeId, notification);
+        }
     }
 
     @MessageMapping("/notifications-send")

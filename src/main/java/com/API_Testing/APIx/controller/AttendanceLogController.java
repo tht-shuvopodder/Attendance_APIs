@@ -49,7 +49,4 @@ public class AttendanceLogController {
         List<AttendanceLogDTO> logs = attendanceLogService.getAllByDeviceMacAndEmpId(deviceMAC, empId);
         return ResponseEntity.ok(logs);
     }
-
-
-
 }

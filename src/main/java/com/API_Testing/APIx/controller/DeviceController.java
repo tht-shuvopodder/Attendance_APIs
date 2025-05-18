@@ -58,7 +58,7 @@ public class DeviceController {
         int rowsAffected = deviceService.deleteDevice(macAddress, tableName);
 
         if (rowsAffected > 0) {
-            return ResponseEntity.ok("✅ Device and it's table deleted successfully.");
+            return ResponseEntity.ok("✅ Device and Employee table deleted successfully.");
         } else {
             throw new NoSuchElementException("No such device found..!");
         }

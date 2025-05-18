@@ -25,11 +25,11 @@ public class EmployeeController {
     @PostMapping("/add")
     public ResponseEntity<String> addEmployee(@RequestBody EmployeeDTO employee) {
         if (employee.getDeviceMAC() == null || employee.getDeviceMAC().isBlank()) {
-            throw new GlobalExceptionHandler.InvalidRequestException("MAC address is mandatory to add employee data.");
+            throw new GlobalExceptionHandler.InvalidRequestException("MAC address is mandatory to add employee data..!");
         }
         validator.validateDeviceExists(employee.getDeviceMAC());
         if (employeeService.existsByDeviceMACAndEmployeeId(employee.getDeviceMAC(), employee.getEmployeeId())) {
-            throw new GlobalExceptionHandler.EmployeeAlreadyExistsException("Employee already exists under this device.");
+            throw new GlobalExceptionHandler.EmployeeAlreadyExistsException("Employee already exists under this device..!");
         }
         employeeService.addEmployeeToDevice(employee);
         return ResponseEntity.ok("✅ Employee added successfully.");

@@ -106,17 +106,26 @@ public class EmployeeImpl implements EmployeeService {
         StringBuilder result = new StringBuilder();
 
         if (rows == 0) {
-            result.append("Employee not found..!");
+            result.append("⚠️ Employee not found..!");
         } else {
             result.append("✅ Employee deleted successfully ");
         }
+
         int logRows = jdbcTemplate.update("DELETE FROM phone_log WHERE emp_id = ?", employeeId);
 
-
         if (logRows == 0) {
-            result.append("⚠️ but Phone Log not found for deletion.");
+            result.append("⚠️ but Phone Log not found..! ");
         } else {
-            result.append("with the Phone Log.");
+            result.append("with the Phone Log ");
+        }
+
+        int attendanceRows = jdbcTemplate.update(
+                "DELETE FROM attendance_log WHERE emp_id = ? AND mac_id = ?", employeeId, macAddress);
+
+        if (attendanceRows == 0) {
+            result.append("⚠️ Attendance log not found..! ");
+        } else {
+            result.append("and also Attendance log deleted. ✅");
         }
 
         return result.toString();

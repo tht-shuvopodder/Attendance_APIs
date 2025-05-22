@@ -57,6 +57,20 @@ public class GlobalExceptionHandler {
         }
     }
 
+    public static class AdminNotFoundException extends RuntimeException {
+        public AdminNotFoundException(String msg) {
+            super(msg);
+        }
+    }
+
+
+    public static class TaskNotFoundException extends RuntimeException {
+        public TaskNotFoundException(String msg) {
+            super(msg);
+        }
+    }
+
+
     public static class EmployeeNotFoundException extends RuntimeException {
         public EmployeeNotFoundException(String msg) {
             super(msg);

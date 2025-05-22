@@ -18,12 +18,12 @@ public class NotificationServiceController {
         this.notificationRepository = notificationRepository;
     }
 
-    public void sendNotification(String destination, Notification notification) {
+    public void sendNotification(String destination, Notification notification) { //Broadcasts a notification to a topic.
         logger.info("Sending notification to {} : {}", destination, notification);
         simpMessagingTemplate.convertAndSend(destination, notification);
     }
 
-    public void sendMessage(String destination, Object message) {
+    public void sendMessage(String destination, Object message) { //Saves the message (cast to Notification) to DB, then sends it to the topic.
         logger.info("Sending Message to {} : {}", destination, message);
 
         Notification notification = notificationRepository.save((Notification) message);

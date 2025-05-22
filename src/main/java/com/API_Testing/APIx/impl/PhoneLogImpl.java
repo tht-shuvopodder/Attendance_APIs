@@ -54,7 +54,7 @@ public class PhoneLogImpl implements PhoneLogService {
 
 
         Notification notification = new Notification();
-        notification.setTitle("Welcome ");
+        notification.setTitle("Welcome to Grozziie Mobile App ");
         notification.setSeen(false);
         notification.setContent("Welcome message");
         notification.setReceiver(phoneLog.getEmpId());

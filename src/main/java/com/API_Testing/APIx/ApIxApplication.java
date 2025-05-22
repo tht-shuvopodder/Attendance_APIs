@@ -7,6 +7,7 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -26,9 +27,12 @@ public class ApIxApplication {
 		module.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(FORMATTER));
 
 		ObjectMapper mapper = new ObjectMapper();
-		mapper.registerModule(module);
+		//mapper.registerModule(module);
+		mapper.registerModule(new JavaTimeModule());
 		mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
 		return mapper;
 	}
+
 
 }

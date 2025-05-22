@@ -5,10 +5,12 @@ import com.API_Testing.APIx.model.request.EmployeeDTO;
 import com.API_Testing.APIx.repository.NotificationRepository;
 import com.API_Testing.APIx.service.EmployeeService;
 import com.API_Testing.APIx.websocket.Notification;
+import com.API_Testing.APIx.websocket.NotificationServiceController;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -27,6 +29,8 @@ public class EmployeeImpl implements EmployeeService {
 
     private final SimpMessagingTemplate simpMessagingTemplate;
     private final NotificationRepository notificationRepository;
+    @Autowired
+    private NotificationServiceController notificationServiceController;
 
     private static final Map<String, String> FIELD_TO_COLUMN = Map.ofEntries(
             Map.entry("name", "name"),
@@ -78,6 +82,10 @@ public class EmployeeImpl implements EmployeeService {
     @Override
     public void partialUpdateEmployee(String macAddress, String employeeId, Map<String, Object> updates) {
         String tableName = formatMacToTableName(macAddress);
+
+        String fetchSql = "SELECT employee_id, device_MAC FROM " + tableName + " WHERE employee_id = ?";
+        Map<String, Object> empRow = jdbcTemplate.queryForMap(fetchSql, employeeId);
+
         StringBuilder sql = new StringBuilder("UPDATE " + tableName + " SET ");
         List<Object> params = new ArrayList<>();
 
@@ -102,6 +110,20 @@ public class EmployeeImpl implements EmployeeService {
         if (jdbcTemplate.update(sql.toString(), params.toArray()) == 0) {
             throw new RuntimeException("Employee not found or update failed.");
         }
+
+        Notification notification = new Notification();
+        notification.setTitle("Profile Updated");
+        notification.setContent("Your profile has been updated by Admin.");
+        notification.setSeen(false);
+        notification.setReceiver((String) empRow.get("employee_id")); // or email if you use that as receiver
+        notification.setMac((String) empRow.get("device_MAC")); // if your topic is mac-specific
+        notification.setType("UPDATE");
+
+// Save and send it
+        notificationServiceController.sendMessage(
+                "/topic/notifications/" + notification.getMac() + "/" + notification.getReceiver(),
+                notification
+        );
     }
 
     @Override
@@ -114,7 +136,7 @@ public class EmployeeImpl implements EmployeeService {
         if (rows == 0) {
             result.append("⚠️ Employee not found..!");
         } else {
-            result.append("✅ Employee deleted successfully ");
+            result.append("✅ Employee deleted successfully.");
 
 
             Notification notification = new Notification();
@@ -144,7 +166,7 @@ public class EmployeeImpl implements EmployeeService {
         if (attendanceRows == 0) {
             result.append("⚠️ Attendance log not found..! ");
         } else {
-            result.append("and also Attendance log deleted. ✅");
+            result.append("and Attendance log deleted also. ✅");
         }
 
         return result.toString();

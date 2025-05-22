@@ -17,16 +17,16 @@ public class Admin {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ID")
-    private long id;
+    @Column(name = "Admin_ID")
+    private Long adminId;
 
-    @Column(name = "Admin_name")
-    private String name;
+    @Column(name = "Admin_name", unique = true)
+    private String adminName;
 
-    @Column(name = "Email")
-    private String email;
+    @Column(name = "Email", unique = true)
+    private String adminEmail;
 
-    @Column(name = "Contact_No")
+    @Column(name = "Contact_No", unique = true)
     private String phone;
 
 }

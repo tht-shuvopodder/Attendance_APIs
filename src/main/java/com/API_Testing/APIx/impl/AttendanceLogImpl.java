@@ -6,7 +6,6 @@ import com.API_Testing.APIx.model.request.AttendanceLogDTO;
 import com.API_Testing.APIx.repository.AttendanceLogRepo;
 import com.API_Testing.APIx.service.AttendanceLogService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -23,9 +22,6 @@ public class AttendanceLogImpl  implements AttendanceLogService {
 
     @Autowired
     DeviceEmployeeValidator validator;
-
-    @Autowired
-    JdbcTemplate jdbcTemplate;
 
 
     @Override
@@ -105,10 +101,6 @@ public class AttendanceLogImpl  implements AttendanceLogService {
         validator.validateDeviceAndEmployee(deviceMAC, empId);
 
         List<AttendanceLog> logs = attendanceLogRepo.findByEmpIdAndMacID(empId, deviceMAC);
-
-        if (logs.isEmpty()) {
-            throw new NoSuchElementException("❌ No attendance records found for employee " + empId + " under device " + deviceMAC);
-        }
 
         return logs.stream()
                 .map(this::mapToDTO)

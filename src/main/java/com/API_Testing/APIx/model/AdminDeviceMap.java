@@ -16,7 +16,13 @@ public class AdminDeviceMap {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "Admin_name")
+    private String adminName;
+
+    @Column(name = "Admin_Email")
     private String adminEmail;
+
+    @Column(name = "Device_MAC")
     private String deviceMAC;
 
 }

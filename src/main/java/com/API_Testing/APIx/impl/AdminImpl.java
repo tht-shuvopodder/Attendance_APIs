@@ -30,25 +30,26 @@ public class AdminImpl implements AdminService {
     public String assignAdminToDevice(AdminDeviceAssignDTO dto) {
         // ✅ Check if dev exists
         validator.validateDeviceExists(dto.getDeviceMAC());
-        validator.validateAdminUniqueness(dto.getName(), dto.getEmail(), dto.getPhone());
+        validator.validateAdminUniqueness(dto.getAdminName(), dto.getAdminEmail(), dto.getPhone());
 
         // ✅ Check if admin already exists by email
-        Admin admin = adminRepo.findByEmail(dto.getEmail()).orElseGet(() -> {
+        Admin admin = adminRepo.findByAdminEmail(dto.getAdminEmail()).orElseGet(() -> {
             Admin newAdmin = new Admin();
-            newAdmin.setName(dto.getName());
+            newAdmin.setAdminName(dto.getAdminName());
             newAdmin.setPhone(dto.getPhone());
-            newAdmin.setEmail(dto.getEmail());
+            newAdmin.setAdminEmail(dto.getAdminEmail());
             return adminRepo.save(newAdmin);
         });
 
-        boolean alreadyMapped = mapRepo.existsByAdminEmailAndDeviceMAC(admin.getEmail(), dto.getDeviceMAC());
+        boolean alreadyMapped = mapRepo.existsByAdminEmailAndDeviceMAC(admin.getAdminEmail(), dto.getDeviceMAC());
         if (alreadyMapped) {
-            return "⚠️ Admin is already assigned to this device.";
+            return "⚠️ Admin is already assigned to this device..!";
         }
 
         // ✅ Create the mapping
         AdminDeviceMap map = new AdminDeviceMap();
-        map.setAdminEmail(admin.getEmail());
+        map.setAdminName(admin.getAdminName());
+        map.setAdminEmail(admin.getAdminEmail());
         map.setDeviceMAC(dto.getDeviceMAC());
         mapRepo.save(map);
 
@@ -57,7 +58,7 @@ public class AdminImpl implements AdminService {
 
     @Override
     public List<String> getDeviceMACsByAdminEmail(String email) {
-        Optional<Admin> optionalAdmin = adminRepo.findByEmail(email);
+        Optional<Admin> optionalAdmin = adminRepo.findByAdminEmail(email);
         if (optionalAdmin.isEmpty()) {
             throw new IllegalArgumentException("Admin with email " + email + " not found..!");
         }
@@ -70,6 +71,7 @@ public class AdminImpl implements AdminService {
 
     @Override
     public List<String> getAdminEmailsByDeviceMAC(String deviceMAC) {
+        validator.validateDeviceExists(deviceMAC);
         List<AdminDeviceMap> mappings = mapRepo.findByDeviceMAC(deviceMAC);
 
         return mappings.stream()

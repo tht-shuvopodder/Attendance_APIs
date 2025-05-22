@@ -28,8 +28,8 @@ public class RealtimeMessagingController {
 
     @MessageMapping("/messages")
     @SendTo("/topic/chat")
-    public ResponseEntity<?> sendMessage(@Payload String message){
-        logger.info("Message received: " + message);
+    public ResponseEntity<?> sendMessage(@Payload String message){ //It broadcasts the message to all subscribers of /topic/chat.
+        logger.info("Message received: {}", message);
         System.out.println("Message received: " + message);
 
         simpMessagingTemplate.convertAndSend("/topic/chat", message);
@@ -37,17 +37,17 @@ public class RealtimeMessagingController {
     }
 
     @MessageMapping("/notification-seen")
-    public void seenNotification(@Payload Notification notification){
-        logger.info("Notification seen received: " + notification);
+    public void seenNotification(@Payload Notification notification){ //When the client tells the server that a notification is seen, this deletes it from the DB.
+        logger.info("Notification seen received: {}", notification);
         notificationRepository.delete(notification);
     }
 
     @MessageMapping("/connect")
-    public void connectUser(@Payload Map<String, String> payload){
+    public void connectUser(@Payload Map<String, String> payload){ //Server looks up unseen notifications and sends them one-by-one with { macId, employeeId }
         String mac = payload.get("mac");
         String employeeId = payload.get("employeeId");
 
-        logger.info("Connecting user: " + mac);
+        logger.info("Connecting user: {}", mac);
 
         // search in db and resend to user
         List<Notification> notificationList = notificationRepository.findAllByMacAndReceiver(mac, employeeId);
@@ -60,7 +60,7 @@ public class RealtimeMessagingController {
 
     @MessageMapping("/notifications-send")
     @SendTo("/topic/notifications")
-    public ResponseEntity<?> sendNotification(@Payload Notification notification){
+    public ResponseEntity<?> sendNotification(@Payload Notification notification){ //This sends a new notification
        // simpMessagingTemplate.convertAndSend("/topic/notifications", notification);
         simpMessagingTemplate.convertAndSend(
                 "/topic/notifications/"+notification.getReceiver().toString(),

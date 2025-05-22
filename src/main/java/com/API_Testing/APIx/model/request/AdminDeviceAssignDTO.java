@@ -10,9 +10,9 @@ import lombok.Setter;
 @Setter
 public class AdminDeviceAssignDTO {
 
-    private String name;
+    private String adminName;
     private String phone;
-    private String email;
+    private String adminEmail;
     private String deviceMAC;
 
 }
